@@ -1,0 +1,28 @@
+name: archconnect_ke
+description: ArchConnect KE — Kenya's digital marketplace for architecture professionals.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  uuid: ^4.4.0
+
+  # Uncomment as you wire up the real backend (matches your other Flutter
+  # apps: Firebase Auth, Firestore, M-Pesa via Daraja):
+  # firebase_core: ^3.0.0
+  # firebase_auth: ^5.0.0
+  # cloud_firestore: ^5.0.0
+  # flutter_riverpod: ^2.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
