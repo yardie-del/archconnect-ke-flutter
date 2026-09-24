@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
 import '../models/bid.dart';
+import '../models/escrow_transaction.dart';
+import '../widgets/escrow_funding_dialog.dart';
 import '../widgets/tier_badge.dart';
 import '../widgets/wallet_helpers.dart';
+import 'escrow_status_screen.dart';
 
 /// Dart port of the Kotlin `BidItemView`, wrapped in a screen listing every
-/// bid a client has received on their posted project. Accepting a bid is
-/// the entry point into escrow funding (next screen to port).
+/// bid a client has received on their posted project. Accepting a bid opens
+/// [EscrowFundingDialog] (bank transfer) and, on confirmation, pushes
+/// [EscrowStatusScreen] to track the held funds through to release.
 class BidReviewScreen extends StatelessWidget {
   const BidReviewScreen({
     super.key,
+    required this.projectId,
     required this.projectTitle,
+    required this.clientId,
+    required this.clientName,
     required this.bids,
-    required this.onAcceptBid,
+    this.onAcceptBid,
   });
 
+  final String projectId;
   final String projectTitle;
+  final String clientId;
+  final String clientName;
   final List<Bid> bids;
-  final ValueChanged<Bid> onAcceptBid;
+
+  /// Optional extra hook, called after the escrow is funded (e.g. to
+  /// update a parent's state). Navigation to the status screen happens
+  /// regardless.
+  final ValueChanged<EscrowTransaction>? onAcceptBid;
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +50,28 @@ class BidReviewScreen extends StatelessWidget {
           else
             ...bids.map((b) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: _BidCard(bid: b, onAcceptAndPay: () => onAcceptBid(b)),
+                  child: _BidCard(bid: b, onAcceptAndPay: () => _acceptBid(context, b)),
                 )),
         ],
       ),
     );
+  }
+
+  Future<void> _acceptBid(BuildContext context, Bid bid) async {
+    final tx = await showDialog<EscrowTransaction>(
+      context: context,
+      builder: (_) => EscrowFundingDialog(
+        projectId: projectId,
+        projectTitle: projectTitle,
+        clientId: clientId,
+        clientName: clientName,
+        architectId: bid.projectId, // placeholder until real architect id is wired up
+        bid: bid,
+      ),
+    );
+    if (tx == null || !context.mounted) return;
+    onAcceptBid?.call(tx);
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => EscrowStatusScreen(transaction: tx)));
   }
 }
 
