@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'models/architect_profile.dart';
 import 'models/architect_tier.dart';
-import 'models/payout.dart';
-import 'screens/wallet_screen.dart';
+import 'screens/architect_profile_screen.dart';
 
 void main() => runApp(const ArchConnectApp());
 
@@ -13,48 +13,55 @@ class ArchConnectApp extends StatelessWidget {
     return MaterialApp(
       title: 'ArchConnect KE',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
-      home: _buildDemoWallet(),
+      home: _buildDemoProfile(),
     );
   }
 
-  Widget _buildDemoWallet() {
+  Widget _buildDemoProfile() {
     // Sample data standing in for what will come from Firestore once the
-    // backend is wired up. Swap this for a real architect profile + payout
-    // history stream later.
-    final samplePayouts = [
-      Payout(
-        architectId: 'demo-architect-id',
-        architectName: 'Jane Mwangi',
-        projectTitle: 'Karen Residence - Phase 2',
-        amountKsh: 87000,
-        method: PayoutMethod.mpesa,
-        mpesaB2cRef: 'QGT7X9K2L1',
-        recipientPhone: '+254720889900',
-        netReceivedKsh: 86975,
+    // backend is wired up.
+    const profile = ArchitectProfile(
+      userId: 'demo-architect-id',
+      firmName: 'Mwangi & Associates Architects',
+      tier: ArchitectTier.gold,
+      isBoraqsVerified: true,
+      boraqsNumber: 'BORAQS #A-4471',
+      bio: 'Premier registered architectural practice specializing in '
+          'luxury sustainable villas, commercial towers and hospitality '
+          'projects across Nairobi and Homa Bay.',
+      location: 'Karen, Nairobi',
+      ratingAvg: 4.8,
+      reviewCount: 23,
+      completedProjects: 41,
+      onTimeRate: 96,
+      responseTimeHours: 2,
+    );
+
+    final reviews = [
+      Review(
+        id: '1',
+        clientName: 'David Otieno',
+        rating: 5,
+        comment: 'Excellent communication and the final design exceeded our brief.',
+        date: DateTime(2026, 8, 12),
       ),
-      Payout(
-        architectId: 'demo-architect-id',
-        architectName: 'Jane Mwangi',
-        projectTitle: 'Kisumu Office Fit-Out',
-        amountKsh: 45000,
-        method: PayoutMethod.bank,
-        bankName: 'Equity Bank',
-        bankAccountNumber: '0123456789',
-        bankAccountName: 'Jane Mwangi',
-        netReceivedKsh: 44975,
+      Review(
+        id: '2',
+        clientName: 'Grace Nyambura',
+        rating: 4,
+        comment: 'Great work overall, milestone updates could have been faster.',
+        date: DateTime(2026, 7, 3),
       ),
     ];
 
-    return ArchitectWalletScreen(
-      architectId: 'demo-architect-id',
-      architectName: 'Jane Mwangi',
-      tier: ArchitectTier.gold,
-      totalRevenueKsh: 245000,
-      payouts: samplePayouts,
-      onPayoutConfirmed: (payout) {
-        // TODO: send to repository/backend once that layer is built.
-        debugPrint('Confirmed payout: ${payout.toJson()}');
-      },
+    return ArchitectPublicProfileScreen(
+      profile: profile,
+      reviews: reviews,
+      viewerRole: ViewerRole.client,
+      onHireTap: () => debugPrint('Post Project & Invite tapped'),
+      onTierUpgradeSubmitted: (req) => debugPrint(
+        'Tier upgrade requested: ${req.tier.title} / ${req.boraqsNumber}',
+      ),
     );
   }
 }

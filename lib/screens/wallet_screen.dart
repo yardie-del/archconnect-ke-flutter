@@ -3,18 +3,14 @@ import 'package:intl/intl.dart';
 import '../models/architect_tier.dart';
 import '../models/payout.dart';
 import '../widgets/withdraw_dialog.dart';
+import '../widgets/wallet_helpers.dart';
 
-const _mpesaGreen = Color(0xFF16A34A);
-const _mpesaGreenContainer = Color(0xFFDCFCE7);
-const _kenyaRed = Color(0xFFB91C1C);
-const _slateDark = Color(0xFF1E293B);
-const _slateMuted = Color(0xFF64748B);
-const _cardBorder = Color(0xFFE2E8F0);
-
-String formatKsh(int amount) {
-  final f = NumberFormat.decimalPattern('en_US');
-  return 'Ksh ${f.format(amount)}';
-}
+const _mpesaGreen = mpesaGreen;
+const _mpesaGreenContainer = mpesaGreenContainer;
+const _kenyaRed = kenyaRed;
+const _slateDark = slateDark;
+const _slateMuted = slateMuted;
+const _cardBorder = cardBorder;
 
 /// Dart port of the Kotlin `ArchitectWalletScreen`.
 ///
