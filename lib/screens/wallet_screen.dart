@@ -98,7 +98,7 @@ class _ArchitectWalletScreenState extends State<ArchitectWalletScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
@@ -211,10 +211,10 @@ class _ArchitectWalletScreenState extends State<ArchitectWalletScreen> {
           children: [
             Row(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 18,
                   backgroundColor: _mpesaGreenContainer,
-                  child: const Icon(Icons.arrow_outward, color: _mpesaGreen, size: 18),
+                  child: Icon(Icons.arrow_outward, color: _mpesaGreen, size: 18),
                 ),
                 const SizedBox(width: 10),
                 Column(

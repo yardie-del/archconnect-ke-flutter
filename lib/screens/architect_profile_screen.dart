@@ -4,6 +4,7 @@ import '../models/architect_profile.dart';
 import '../models/architect_tier.dart';
 import '../widgets/tier_upgrade_dialog.dart';
 import '../widgets/wallet_helpers.dart';
+import '../widgets/tier_badge.dart';
 
 /// Who is viewing the profile — mirrors the Kotlin check on
 /// `currentUser?.role == UserRole.CLIENT` to decide which CTA to show.
@@ -104,7 +105,7 @@ class ArchitectPublicProfileScreen extends StatelessWidget {
                 ),
                 ),
                 const SizedBox(width: 8),
-                _TierBadge(tier: profile.tier, isBoraqsVerified: profile.isBoraqsVerified),
+                TierBadge(tier: profile.tier, isBoraqsVerified: profile.isBoraqsVerified),
               ],
             ),
             if (profile.boraqsNumber.isNotEmpty) ...[
@@ -229,37 +230,6 @@ class ArchitectPublicProfileScreen extends StatelessWidget {
         else
           ...reviews.map((r) => _ReviewCard(review: r)),
       ],
-    );
-  }
-}
-
-class _TierBadge extends StatelessWidget {
-  const _TierBadge({required this.tier, required this.isBoraqsVerified});
-  final ArchitectTier tier;
-  final bool isBoraqsVerified;
-
-  Color get _tierColor => switch (tier) {
-        ArchitectTier.diamond => const Color(0xFF0EA5E9),
-        ArchitectTier.gold => safariGold,
-        ArchitectTier.silver => const Color(0xFF94A3B8),
-        ArchitectTier.bronze => const Color(0xFFB45309),
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: _tierColor.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(tier.title, style: TextStyle(color: _tierColor, fontWeight: FontWeight.bold, fontSize: 11)),
-          if (isBoraqsVerified) ...[
-            const SizedBox(width: 3),
-            Icon(Icons.verified, size: 12, color: _tierColor),
-          ],
-        ],
-      ),
     );
   }
 }
