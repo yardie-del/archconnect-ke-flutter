@@ -20,6 +20,7 @@ class HomeScreen extends StatelessWidget {
     this.onBrowseBriefs,
     this.onViewProfile,
     this.onWallet,
+    this.onProjectDetails,
   });
 
   final AppUser user;
@@ -29,6 +30,7 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onBrowseBriefs;
   final VoidCallback? onViewProfile;
   final VoidCallback? onWallet;
+  final VoidCallback? onProjectDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -67,10 +69,12 @@ class HomeScreen extends StatelessWidget {
           if (isClient) ...[
             _actionTile(context, Icons.assignment_add, 'Post a Brief', 'Describe your project and get bids', onPostBrief),
             _actionTile(context, Icons.gavel, 'Review Bids', 'See offers from verified architects', onReviewBids),
+            _actionTile(context, Icons.timeline, 'Active Project Tracking', 'Milestones, deliverables & approvals', onProjectDetails),
           ] else ...[
             _actionTile(context, Icons.storefront, 'Browse Open Briefs', 'Bid on client projects', onBrowseBriefs),
             _actionTile(context, Icons.badge, 'My Public Profile', 'What clients see about you', onViewProfile),
             _actionTile(context, Icons.account_balance_wallet, 'Wallet', 'Balance & payout history', onWallet),
+            _actionTile(context, Icons.timeline, 'Active Project Tracking', 'Milestones, deliverables & approvals', onProjectDetails),
           ],
         ],
       ),

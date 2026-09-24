@@ -3,6 +3,7 @@ import 'models/app_user.dart';
 import 'models/architect_profile.dart';
 import 'models/architect_tier.dart';
 import 'models/bid.dart';
+import 'models/milestone.dart';
 import 'models/project_brief.dart';
 import 'screens/architect_profile_screen.dart';
 import 'screens/auth_screen.dart';
@@ -10,6 +11,7 @@ import 'screens/bid_review_screen.dart';
 import 'screens/bidding_board_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/post_brief_screen.dart';
+import 'screens/project_details_screen.dart';
 import 'screens/wallet_screen.dart';
 
 void main() => runApp(const ArchConnectApp());
@@ -56,6 +58,33 @@ class _AppRootState extends State<_AppRoot> {
     ),
   ];
   final List<Bid> _bids = [];
+
+  List<Milestone> _milestones = [
+    Milestone(
+      projectId: 'proj-1',
+      stageNumber: 1,
+      title: 'Concept Design & Site Analysis',
+      percentage: 30,
+      amountKsh: 60000,
+      dueDateDays: 5,
+    ),
+    Milestone(
+      projectId: 'proj-1',
+      stageNumber: 2,
+      title: 'Schematic Drawings & County Submission',
+      percentage: 30,
+      amountKsh: 60000,
+      dueDateDays: 10,
+    ),
+    Milestone(
+      projectId: 'proj-1',
+      stageNumber: 3,
+      title: 'Final CAD Package & Handover',
+      percentage: 40,
+      amountKsh: 80000,
+      dueDateDays: 14,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +152,19 @@ class _AppRootState extends State<_AppRoot> {
           tier: user.tier ?? ArchitectTier.gold,
           totalRevenueKsh: 0,
           payouts: const [],
+        ),
+      )),
+      onProjectDetails: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => ProjectDetailsScreen(
+          projectTitle: _openProjects.first.title,
+          category: _openProjects.first.category.displayName,
+          location: _openProjects.first.location,
+          milestones: _milestones,
+          viewerRole: user.role,
+          onMilestonesChanged: (updated) => setState(() => _milestones = updated),
+          onRaiseDispute: (m) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Dispute raised on "${m.title}" (Dispute Centre not built yet).')),
+          ),
         ),
       )),
     );
