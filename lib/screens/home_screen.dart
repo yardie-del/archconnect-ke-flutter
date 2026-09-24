@@ -21,6 +21,8 @@ class HomeScreen extends StatelessWidget {
     this.onViewProfile,
     this.onWallet,
     this.onProjectDetails,
+    this.onOpenNotifications,
+    this.unreadNotificationCount = 0,
   });
 
   final AppUser user;
@@ -31,6 +33,8 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onViewProfile;
   final VoidCallback? onWallet;
   final VoidCallback? onProjectDetails;
+  final VoidCallback? onOpenNotifications;
+  final int unreadNotificationCount;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +44,25 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Welcome, ${user.fullName}'),
         actions: [
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(onPressed: onOpenNotifications, icon: const Icon(Icons.notifications_outlined)),
+              if (unreadNotificationCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(color: kenyaRed, shape: BoxShape.circle),
+                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                    child: Text('$unreadNotificationCount',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+            ],
+          ),
           IconButton(onPressed: onSignOut, icon: const Icon(Icons.logout), tooltip: 'Sign Out'),
         ],
       ),

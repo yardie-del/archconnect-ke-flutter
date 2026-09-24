@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'models/app_notification.dart';
 import 'models/app_user.dart';
 import 'models/architect_profile.dart';
 import 'models/architect_tier.dart';
@@ -10,6 +11,7 @@ import 'screens/auth_screen.dart';
 import 'screens/bid_review_screen.dart';
 import 'screens/bidding_board_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/notifications_screen.dart';
 import 'screens/post_brief_screen.dart';
 import 'screens/project_details_screen.dart';
 import 'screens/wallet_screen.dart';
@@ -86,6 +88,14 @@ class _AppRootState extends State<_AppRoot> {
     ),
   ];
 
+  final List<AppNotification> _notifications = [];
+
+  void _addNotification(NotificationType type, String title, String message, {String? projectId}) {
+    setState(() {
+      _notifications.insert(0, AppNotification(type: type, title: title, message: message, projectId: projectId));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_currentUser == null) {
@@ -95,6 +105,17 @@ class _AppRootState extends State<_AppRoot> {
     return HomeScreen(
       user: user,
       onSignOut: () => setState(() => _currentUser = null),
+      unreadNotificationCount: _notifications.where((n) => !n.isRead).length,
+      onOpenNotifications: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => NotificationsScreen(
+          notifications: _notifications,
+          onNotificationsChanged: (updated) => setState(() {
+            _notifications
+              ..clear()
+              ..addAll(updated);
+          }),
+        ),
+      )),
       onPostBrief: () => Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => PostBriefScreen(
           onBriefPosted: (brief) {
@@ -118,16 +139,24 @@ class _AppRootState extends State<_AppRoot> {
       onBrowseBriefs: () => Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => BiddingBoardScreen(
           openProjects: _openProjects,
-          onBidSubmitted: (bid) => setState(() => _bids.add(Bid(
-                id: bid.id,
-                projectId: bid.projectId,
-                architectName: user.fullName,
-                architectTier: user.tier ?? ArchitectTier.gold,
-                isBoraqsVerified: user.boraqsNumber.isNotEmpty,
-                amountKsh: bid.amountKsh,
-                deliveryDays: bid.deliveryDays,
-                proposalNote: bid.proposalNote,
-              ))),
+          onBidSubmitted: (bid) {
+            setState(() => _bids.add(Bid(
+                  id: bid.id,
+                  projectId: bid.projectId,
+                  architectName: user.fullName,
+                  architectTier: user.tier ?? ArchitectTier.gold,
+                  isBoraqsVerified: user.boraqsNumber.isNotEmpty,
+                  amountKsh: bid.amountKsh,
+                  deliveryDays: bid.deliveryDays,
+                  proposalNote: bid.proposalNote,
+                )));
+            _addNotification(
+              NotificationType.newBid,
+              'New Bid Received',
+              '${user.fullName} bid ${bid.amountKsh} Ksh on "${_openProjects.first.title}".',
+              projectId: bid.projectId,
+            );
+          },
         ),
       )),
       onViewProfile: () => Navigator.of(context).push(MaterialPageRoute(
@@ -161,7 +190,33 @@ class _AppRootState extends State<_AppRoot> {
           location: _openProjects.first.location,
           milestones: _milestones,
           viewerRole: user.role,
-          onMilestonesChanged: (updated) => setState(() => _milestones = updated),
+          onMilestonesChanged: (updated) {
+            for (final m in updated) {
+              final old = _milestones.firstWhere((x) => x.id == m.id, orElse: () => m);
+              if (old.status != m.status) {
+                switch (m.status) {
+                  case MilestoneStatus.held:
+                    _addNotification(NotificationType.escrowFunded, 'Escrow Funded',
+                        'Stage ${m.stageNumber} (${m.title}) is now funded and held in escrow.',
+                        projectId: m.projectId);
+                    break;
+                  case MilestoneStatus.delivered:
+                    _addNotification(NotificationType.milestoneDelivered, 'Deliverable Submitted',
+                        'Stage ${m.stageNumber} (${m.title}) is ready for your review.',
+                        projectId: m.projectId);
+                    break;
+                  case MilestoneStatus.released:
+                    _addNotification(NotificationType.milestoneReleased, 'Payment Released',
+                        'Stage ${m.stageNumber} (${m.title}) was approved and funds released.',
+                        projectId: m.projectId);
+                    break;
+                  default:
+                    break;
+                }
+              }
+            }
+            setState(() => _milestones = updated);
+          },
           onRaiseDispute: (m) => ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Dispute raised on "${m.title}" (Dispute Centre not built yet).')),
           ),
