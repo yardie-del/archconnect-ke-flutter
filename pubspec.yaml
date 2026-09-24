@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   uuid: ^4.4.0
+  intl: ^0.19.0
 
   # Uncomment as you wire up the real backend (matches your other Flutter
   # apps: Firebase Auth, Firestore, M-Pesa via Daraja):
@@ -26,3 +27,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
