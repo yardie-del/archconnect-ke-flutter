@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/app_user.dart' show UserRole;
+import '../models/architect_profile.dart' show Review;
 import '../models/dispute.dart';
 import '../models/milestone.dart';
 import '../widgets/raise_dispute_dialog.dart';
+import '../widgets/rate_and_review_dialog.dart';
 import '../widgets/wallet_helpers.dart';
 
 Color _statusColor(MilestoneStatus s) => switch (s) {
@@ -37,6 +39,7 @@ class ProjectDetailsScreen extends StatefulWidget {
     required this.architectName,
     this.onMilestonesChanged,
     this.onDisputeRaised,
+    this.onReviewSubmitted,
   });
 
   final String projectId;
@@ -51,6 +54,7 @@ class ProjectDetailsScreen extends StatefulWidget {
   final String architectName;
   final ValueChanged<List<Milestone>>? onMilestonesChanged;
   final ValueChanged<Dispute>? onDisputeRaised;
+  final ValueChanged<Review>? onReviewSubmitted;
 
   @override
   State<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
@@ -58,8 +62,10 @@ class ProjectDetailsScreen extends StatefulWidget {
 
 class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   late List<Milestone> _milestones = widget.milestones;
+  bool _reviewSubmitted = false;
 
   int get _completedCount => _milestones.where((m) => m.status == MilestoneStatus.released).length;
+  bool get _allReleased => _milestones.isNotEmpty && _completedCount == _milestones.length;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +125,42 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   onRaiseDispute: () => _openDisputeDialog(m),
                 ),
               )),
+          if (widget.viewerRole == UserRole.client && _allReleased) ...[
+            const SizedBox(height: 16),
+            Card(
+              color: mpesaGreenContainer.withOpacity(0.5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Project Complete!', style: TextStyle(fontWeight: FontWeight.bold, color: kenyaGreenPrimary)),
+                    const SizedBox(height: 4),
+                    Text(
+                      _reviewSubmitted
+                          ? 'Thanks for your feedback on ${widget.architectName}.'
+                          : 'All milestones released. Share your experience with ${widget.architectName}.',
+                      style: const TextStyle(fontSize: 12, color: slateMedium),
+                    ),
+                    if (!_reviewSubmitted) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 40,
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(backgroundColor: safariGold),
+                          onPressed: _openReviewDialog,
+                          icon: const Icon(Icons.star, size: 16),
+                          label: const Text('Rate & Review Architect', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -152,6 +194,16 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       description: submission.description,
     );
     widget.onDisputeRaised?.call(dispute);
+  }
+
+  Future<void> _openReviewDialog() async {
+    final review = await showDialog<Review>(
+      context: context,
+      builder: (_) => RateAndReviewDialog(projectTitle: widget.projectTitle, clientName: widget.clientName),
+    );
+    if (review == null) return;
+    setState(() => _reviewSubmitted = true);
+    widget.onReviewSubmitted?.call(review);
   }
 }
 

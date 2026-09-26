@@ -92,6 +92,7 @@ class _AppRootState extends State<_AppRoot> {
 
   final List<AppNotification> _notifications = [];
   final List<Dispute> _disputes = [];
+  final List<Review> _reviews = [];
 
   void _addNotification(NotificationType type, String title, String message, {String? projectId}) {
     setState(() {
@@ -173,7 +174,7 @@ class _AppRootState extends State<_AppRoot> {
             bio: user.bio,
             location: user.location,
           ),
-          reviews: const [],
+          reviews: _reviews,
           viewerRole: ViewerRole.architect,
         ),
       )),
@@ -230,6 +231,12 @@ class _AppRootState extends State<_AppRoot> {
             _addNotification(NotificationType.disputeUpdate, 'Dispute Opened',
                 'Case ${dispute.caseId} opened on "${dispute.projectTitle}". Escrow held pending admin review.',
                 projectId: dispute.projectId);
+          },
+          onReviewSubmitted: (review) {
+            setState(() => _reviews.add(review));
+            _addNotification(NotificationType.reviewReceived, 'New Review Received',
+                '${review.clientName} left a ${review.rating.toInt()}-star review.',
+                projectId: _openProjects.first.id);
           },
         ),
       )),
