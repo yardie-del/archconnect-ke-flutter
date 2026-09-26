@@ -90,17 +90,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.notifications_none, size: 64, color: slateMuted),
-            const SizedBox(height: 12),
-            const Text('No notifications yet', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: slateDark)),
-            const SizedBox(height: 4),
-            const Text(
+            Icon(Icons.notifications_none, size: 64, color: slateMuted),
+            SizedBox(height: 12),
+            Text('No notifications yet', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: slateDark)),
+            SizedBox(height: 4),
+            Text(
               'Updates on escrow releases, milestones, and project messages will appear here.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: slateMuted),
@@ -154,9 +154,9 @@ class _NotificationCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: notification.isRead ? Colors.transparent : kenyaGreenPrimary.withOpacity(0.05),
+          color: notification.isRead ? Colors.transparent : kenyaGreenPrimary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: notification.isRead ? cardBorder : kenyaGreenPrimary.withOpacity(0.3)),
+          border: Border.all(color: notification.isRead ? cardBorder : kenyaGreenPrimary.withValues(alpha: 0.3)),
         ),
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -165,7 +165,7 @@ class _NotificationCard extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 12),

@@ -83,7 +83,7 @@ class _OpenProjectBidCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: kenyaGreenPrimary.withOpacity(0.12),
+                    color: kenyaGreenPrimary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(project.category.displayName,

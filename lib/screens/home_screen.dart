@@ -23,6 +23,7 @@ class HomeScreen extends StatelessWidget {
     this.onProjectDetails,
     this.onOpenNotifications,
     this.unreadNotificationCount = 0,
+    this.onDisputeCenter,
   });
 
   final AppUser user;
@@ -35,6 +36,7 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onProjectDetails;
   final VoidCallback? onOpenNotifications;
   final int unreadNotificationCount;
+  final VoidCallback? onDisputeCenter;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +101,10 @@ class HomeScreen extends StatelessWidget {
             _actionTile(context, Icons.account_balance_wallet, 'Wallet', 'Balance & payout history', onWallet),
             _actionTile(context, Icons.timeline, 'Active Project Tracking', 'Milestones, deliverables & approvals', onProjectDetails),
           ],
+          const SizedBox(height: 16),
+          const Text('Admin (Demo)', style: TextStyle(fontWeight: FontWeight.bold, color: slateMuted, fontSize: 11)),
+          const SizedBox(height: 6),
+          _actionTile(context, Icons.gavel, 'Dispute Arbitration Center', 'Admin view - real app would gate this behind an admin login', onDisputeCenter),
         ],
       ),
     );

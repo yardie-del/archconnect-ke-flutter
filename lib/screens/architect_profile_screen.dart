@@ -43,7 +43,7 @@ class ArchitectPublicProfileScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               background: profile.coverImageUrl != null
                   ? Image.network(profile.coverImageUrl!, fit: BoxFit.cover,
-                      colorBlendMode: BlendMode.darken, color: Colors.black.withOpacity(0.4))
+                      colorBlendMode: BlendMode.darken, color: Colors.black.withValues(alpha: 0.4))
                   : Container(color: slateDark),
             ),
           ),

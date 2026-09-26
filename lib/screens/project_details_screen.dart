@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/milestone.dart';
 import '../models/app_user.dart' show UserRole;
+import '../models/dispute.dart';
+import '../models/milestone.dart';
+import '../widgets/raise_dispute_dialog.dart';
 import '../widgets/wallet_helpers.dart';
 
 Color _statusColor(MilestoneStatus s) => switch (s) {
@@ -23,22 +25,32 @@ Color _statusColor(MilestoneStatus s) => switch (s) {
 class ProjectDetailsScreen extends StatefulWidget {
   const ProjectDetailsScreen({
     super.key,
+    required this.projectId,
     required this.projectTitle,
     required this.category,
     required this.location,
     required this.milestones,
     required this.viewerRole,
+    required this.clientId,
+    required this.clientName,
+    required this.architectId,
+    required this.architectName,
     this.onMilestonesChanged,
-    this.onRaiseDispute,
+    this.onDisputeRaised,
   });
 
+  final String projectId;
   final String projectTitle;
   final String category;
   final String location;
   final List<Milestone> milestones;
   final UserRole viewerRole;
+  final String clientId;
+  final String clientName;
+  final String architectId;
+  final String architectName;
   final ValueChanged<List<Milestone>>? onMilestonesChanged;
-  final ValueChanged<Milestone>? onRaiseDispute;
+  final ValueChanged<Dispute>? onDisputeRaised;
 
   @override
   State<ProjectDetailsScreen> createState() => _ProjectDetailsScreenState();
@@ -104,7 +116,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                   milestone: m,
                   viewerRole: widget.viewerRole,
                   onAdvance: (updated) => _updateMilestone(updated),
-                  onRaiseDispute: () => widget.onRaiseDispute?.call(m),
+                  onRaiseDispute: () => _openDisputeDialog(m),
                 ),
               )),
         ],
@@ -117,6 +129,29 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
       _milestones = _milestones.map((m) => m.id == updated.id ? updated : m).toList();
     });
     widget.onMilestonesChanged?.call(_milestones);
+  }
+
+  Future<void> _openDisputeDialog(Milestone milestone) async {
+    final submission = await showDialog<DisputeSubmission>(
+      context: context,
+      builder: (_) => const RaiseDisputeDialog(),
+    );
+    if (submission == null) return;
+
+    _updateMilestone(milestone.copyWith(status: MilestoneStatus.disputed));
+
+    final dispute = Dispute(
+      projectId: widget.projectId,
+      projectTitle: widget.projectTitle,
+      clientId: widget.clientId,
+      clientName: widget.clientName,
+      architectId: widget.architectId,
+      architectName: widget.architectName,
+      issueType: submission.issueType,
+      escrowAmountKsh: milestone.amountKsh,
+      description: submission.description,
+    );
+    widget.onDisputeRaised?.call(dispute);
   }
 }
 

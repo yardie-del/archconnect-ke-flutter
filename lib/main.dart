@@ -4,12 +4,14 @@ import 'models/app_user.dart';
 import 'models/architect_profile.dart';
 import 'models/architect_tier.dart';
 import 'models/bid.dart';
+import 'models/dispute.dart';
 import 'models/milestone.dart';
 import 'models/project_brief.dart';
 import 'screens/architect_profile_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/bid_review_screen.dart';
 import 'screens/bidding_board_screen.dart';
+import 'screens/dispute_center_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/notifications_screen.dart';
 import 'screens/post_brief_screen.dart';
@@ -89,6 +91,7 @@ class _AppRootState extends State<_AppRoot> {
   ];
 
   final List<AppNotification> _notifications = [];
+  final List<Dispute> _disputes = [];
 
   void _addNotification(NotificationType type, String title, String message, {String? projectId}) {
     setState(() {
@@ -185,11 +188,16 @@ class _AppRootState extends State<_AppRoot> {
       )),
       onProjectDetails: () => Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => ProjectDetailsScreen(
+          projectId: _openProjects.first.id,
           projectTitle: _openProjects.first.title,
           category: _openProjects.first.category.displayName,
           location: _openProjects.first.location,
           milestones: _milestones,
           viewerRole: user.role,
+          clientId: user.role == UserRole.client ? user.id : 'demo-client-id',
+          clientName: user.role == UserRole.client ? user.fullName : 'David Otieno',
+          architectId: user.role == UserRole.architect ? user.id : 'demo-architect-id',
+          architectName: user.role == UserRole.architect ? user.fullName : 'Jane Mwangi',
           onMilestonesChanged: (updated) {
             for (final m in updated) {
               final old = _milestones.firstWhere((x) => x.id == m.id, orElse: () => m);
@@ -217,9 +225,41 @@ class _AppRootState extends State<_AppRoot> {
             }
             setState(() => _milestones = updated);
           },
-          onRaiseDispute: (m) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Dispute raised on "${m.title}" (Dispute Centre not built yet).')),
-          ),
+          onDisputeRaised: (dispute) {
+            setState(() => _disputes.add(dispute));
+            _addNotification(NotificationType.disputeUpdate, 'Dispute Opened',
+                'Case ${dispute.caseId} opened on "${dispute.projectTitle}". Escrow held pending admin review.',
+                projectId: dispute.projectId);
+          },
+        ),
+      )),
+      onDisputeCenter: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => DisputeCenterScreen(
+          disputes: _disputes,
+          onDisputesChanged: (updated) {
+            for (final d in updated) {
+              final old = _disputes.firstWhere((x) => x.id == d.id, orElse: () => d);
+              if (old.status != d.status && d.status == DisputeStatus.resolved) {
+                _addNotification(NotificationType.disputeUpdate, 'Dispute Resolved',
+                    'Case ${d.caseId} on "${d.projectTitle}" has been resolved: ${d.resolutionNotes}',
+                    projectId: d.projectId);
+                if (d.resolutionNotes.startsWith('Released to architect')) {
+                  setState(() {
+                    _milestones = _milestones
+                        .map((m) => (m.projectId == d.projectId && m.status == MilestoneStatus.disputed)
+                            ? m.copyWith(status: MilestoneStatus.released, releasedAt: DateTime.now())
+                            : m)
+                        .toList();
+                  });
+                }
+              }
+            }
+            setState(() {
+              _disputes
+                ..clear()
+                ..addAll(updated);
+            });
+          },
         ),
       )),
     );
